@@ -21,7 +21,7 @@ var routes = Routes{
 	Route{
 		"Index",
 		"GET",
-		"/",
+		"/{id}",
 		hb.GetProno,
 	},
 	Route{

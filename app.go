@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	//"github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 	mgo "gopkg.in/mgo.v2"
 
 	"github.com/peano88/pronoStats/dataLayer"
@@ -17,6 +17,8 @@ import (
 
 var db dataLayer.DataBridge
 var hb handler.HandlerBridge
+var r *mux.Router
+var session *mgo.Session
 
 func logErr(err error) {
 	if err != nil {
@@ -25,12 +27,12 @@ func logErr(err error) {
 }
 
 func init() {
-	session, err := mgo.Dial("0.0.0.0")
-	defer session.Close()
+	var err error
+	session, err = mgo.Dial("0.0.0.0")
 
 	logErr(err)
 
-	dataBase := session.DB("<---write here--->")
+	dataBase := session.DB(dataLayer.DB_NAME)
 	if dataBase == nil {
 		log.Fatal("Fatal error in instantiating the DB")
 	}
@@ -41,18 +43,18 @@ func init() {
 		log.Fatal("Fatal error in instantiating the collection")
 	}
 
-	hb.Db = db
+	hb.Init(db)
+	r = NewRouter()
 }
 
 func main() {
 
-	r := NewRouter()
-
+	defer session.Close()
 	var wait time.Duration
 	wait = 13 // to be fixed later
 
 	srv := &http.Server{
-		Addr: "0.0.0.0:8080",
+		Addr: "localhost:4000",
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
