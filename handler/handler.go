@@ -19,16 +19,16 @@ func (hb *HandlerBridge) Init(d dataLayer.DataBridge) {
 	hb.rnd = renderer.New()
 }
 
-func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {
-	var prono dataLayer.Prono
+func (hb *HandlerBridge) AddTournamentPronos(w http.ResponseWriter, r *http.Request) {
+	var tPronos dataLayer.TournamentPronos
 	defer r.Body.Close()
 
-	if err := json.NewDecoder(r.Body).Decode(&prono); err != nil {
-		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
+	if err := json.NewDecoder(r.Body).Decode(&tPronos); err != nil {
+		hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
 		return
 	}
 
-	newId, err := hb.db.AddProno(prono)
+	newId, err := hb.db.AddTournamentPronos(tPronos)
 	if err != nil {
 		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
 		return
@@ -38,6 +38,51 @@ func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (hb *HandlerBridge) GetTournamentPronos(w http.ResponseWriter, r *http.Request) {
+	id, ok := mux.Vars(r)["id"]
+
+	if !ok {
+		hb.rnd.JSON(w, http.StatusBadRequest, "No Id provided")
+		return
+	}
+
+	tPronos, err := hb.db.FindTournamentPronosById(id)
+
+	if err != nil {
+		hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
+		return
+	}
+
+	hb.rnd.JSON(w, http.StatusOK, tPronos)
+}
+
+func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {
+	id, ok := mux.Vars(r)["id_tp"]
+	if !ok {
+		hb.rnd.JSON(w, http.StatusBadRequest, "No Id provided")
+		return
+	}
+
+	var prono dataLayer.Prono
+	defer r.Body.Close()
+
+	if err := json.NewDecoder(r.Body).Decode(&prono); err != nil {
+		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
+		return
+	}
+
+	err := hb.db.AddProno(id, prono)
+	if err != nil {
+		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
+		return
+	}
+
+	hb.rnd.JSON(w, http.StatusOK, "")
+
+}
+
+//Disabled
+/*
 func (hb *HandlerBridge) GetProno(w http.ResponseWriter, r *http.Request) {
 	id, ok := mux.Vars(r)["id"]
 
@@ -56,3 +101,4 @@ func (hb *HandlerBridge) GetProno(w http.ResponseWriter, r *http.Request) {
 	hb.rnd.JSON(w, http.StatusOK, prono)
 
 }
+*/

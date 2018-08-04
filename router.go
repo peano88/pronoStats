@@ -19,16 +19,22 @@ type Routes []Route
 
 var routes = Routes{
 	Route{
-		"Index",
+		"GetTourPr",
 		"GET",
-		"/{id}",
-		hb.GetProno,
+		"/tournament/{id}",
+		hb.GetTournamentPronos,
 	},
 	Route{
-		"AddAlbum",
+		"AddTourn",
 		"POST",
-		"/",
-		hb.AddProno,
+		"/tournament",
+		hb.AddTournamentPronos,
+	},
+	Route{
+		"AddProno",
+		"POST",
+		"/tournament/{id_tp}/prono",
+		hb.AddTournamentPronos,
 	},
 }
 

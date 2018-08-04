@@ -14,11 +14,11 @@ import (
 )
 
 type requesTest struct {
-	endpoint  string
-	method    string
-	prono     dataLayer.Prono
-	expStatus int
-	expProno  dataLayer.Prono
+	endpoint   string
+	method     string
+	prono      dataLayer.Prono
+	tournament dataLayer.TournamentPronos
+	expStatus  int
 }
 
 var baseProno dataLayer.Prono = dataLayer.Prono{
@@ -30,44 +30,60 @@ var baseProno dataLayer.Prono = dataLayer.Prono{
 	PronoHomeScore: 2,
 }
 
+var baseTournament = dataLayer.TournamentPronos{
+	Tournament: "Tourn 1",
+	Sport:      "Sport Z",
+	Pronos:     []dataLayer.Prono{baseProno},
+}
+
 const (
-	BASE_ENDPOINT = "/"
+	BASE_ENDPOINT_TOURNAMENT = "/tournament"
 )
 
 func Test_Endpoints(t *testing.T) {
 	var requests []requesTest
 
 	requests = append(requests, requesTest{
-		endpoint:  BASE_ENDPOINT,
-		method:    "POST",
-		prono:     baseProno,
-		expStatus: http.StatusOK,
+		endpoint:   BASE_ENDPOINT_TOURNAMENT,
+		method:     "POST",
+		tournament: baseTournament,
+		expStatus:  http.StatusOK,
 	})
 
-	pronoWithId := baseProno
-	pronoWithId.ID = bson.NewObjectId()
+	tournamentWithId := baseTournament
+	tournamentWithId.ID = bson.NewObjectId()
 	requests = append(requests, requesTest{
-		endpoint:  BASE_ENDPOINT,
-		method:    "POST",
-		prono:     pronoWithId,
-		expStatus: http.StatusOK,
+		endpoint:   BASE_ENDPOINT_TOURNAMENT,
+		method:     "POST",
+		tournament: tournamentWithId,
+		expStatus:  http.StatusOK,
 	})
 
 	requests = append(requests, requesTest{
-		endpoint:  BASE_ENDPOINT + pronoWithId.ID.Hex(),
+		endpoint:  BASE_ENDPOINT_TOURNAMENT + "/" + tournamentWithId.ID.Hex(),
 		method:    "GET",
 		expStatus: http.StatusOK,
-		expProno:  pronoWithId,
 	})
 
 	requests = append(requests, requesTest{
-		endpoint:  BASE_ENDPOINT + "not existing",
+		endpoint:  BASE_ENDPOINT_TOURNAMENT + "/010102345687123456789012",
 		method:    "GET",
 		expStatus: http.StatusBadRequest,
 	})
 
+	requests = append(requests, requesTest{
+		endpoint:  BASE_ENDPOINT_TOURNAMENT + "/" + tournamentWithId.ID.Hex() + "/prono",
+		method:    "POST",
+		prono:     baseProno,
+		expStatus: http.StatusOK,
+	})
 	for i, rt := range requests {
 		buf := new(bytes.Buffer)
+		if rt.tournament.Tournament != "" {
+			if err := json.NewEncoder(buf).Encode(rt.tournament); err != nil {
+				t.Fatalf("Test %d error : %s", i, err.Error())
+			}
+		}
 		if rt.prono.HomeTeam != "" {
 			if err := json.NewEncoder(buf).Encode(rt.prono); err != nil {
 				t.Fatalf("Test %d error : %s", i, err.Error())
@@ -78,13 +94,16 @@ func Test_Endpoints(t *testing.T) {
 		r.ServeHTTP(rr, req)
 
 		assert.Equal(t, rt.expStatus, rr.Code)
-		if rt.expProno.HomeTeam != "" {
-			var received dataLayer.Prono
-			json.NewDecoder(rr.Body).Decode(&received)
-			if assert.NotEmpty(t, received) {
-				assert.Equal(t, rt.expProno, received)
+
+		/*
+			if rt.expProno.HomeTeam != "" {
+				var received dataLayer.Prono
+				json.NewDecoder(rr.Body).Decode(&received)
+				if assert.NotEmpty(t, received) {
+					assert.Equal(t, rt.expProno, received)
+				}
 			}
-		}
+		*/
 
 	}
 }
