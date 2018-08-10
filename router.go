@@ -12,6 +12,7 @@ type Route struct {
 	Method      string
 	Pattern     string
 	HandlerFunc http.HandlerFunc
+	Queries     [2]string
 }
 
 //Routes defines the list of routes of our API
@@ -19,22 +20,29 @@ type Routes []Route
 
 var routes = Routes{
 	Route{
-		"GetTourPr",
-		"GET",
-		"/tournament/{id}",
-		hb.GetTournamentPronos,
+		Name:        "GetTourPr",
+		Method:      "GET",
+		Pattern:     "/tournaments/{id}",
+		HandlerFunc: hb.GetTournamentPronos,
 	},
 	Route{
-		"AddTourn",
-		"POST",
-		"/tournament",
-		hb.AddTournamentPronos,
+		Name:        "GetTourPrUser",
+		Method:      "GET",
+		Pattern:     "/tournaments",
+		HandlerFunc: hb.GetTournamentPronosByUser,
+		Queries:     [2]string{"user", "{user}"},
 	},
 	Route{
-		"AddProno",
-		"POST",
-		"/tournament/{id_tp}/prono",
-		hb.AddTournamentPronos,
+		Name:        "AddTourn",
+		Method:      "POST",
+		Pattern:     "/tournaments",
+		HandlerFunc: hb.AddTournamentPronos,
+	},
+	Route{
+		Name:        "AddProno",
+		Method:      "POST",
+		Pattern:     "/tournaments/{id_tp}/prono",
+		HandlerFunc: hb.AddTournamentPronos,
 	},
 }
 
@@ -45,11 +53,20 @@ func NewRouter() *mux.Router {
 		var handler http.Handler
 		handler = route.HandlerFunc
 
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(handler)
+		if route.Queries[0] != "" {
+			router.
+				Methods(route.Method).
+				Path(route.Pattern).
+				Name(route.Name).
+				Handler(handler).
+				Queries(route.Queries[0], route.Queries[1])
+		} else {
+			router.
+				Methods(route.Method).
+				Path(route.Pattern).
+				Name(route.Name).
+				Handler(handler)
+		}
 
 	}
 	return router

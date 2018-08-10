@@ -18,6 +18,7 @@ type Prono struct {
 
 type TournamentPronos struct {
 	ID         bson.ObjectId `bson:"_id" json:"id"`
+	User       string        `bson:"user" json:"user"`
 	Sport      string        `bson:"sport" json:"sport"`
 	Tournament string        `bson:"tournament" json:"tournament"`
 	Pronos     []Prono       `bson:"pronos" json:"pronos"`
@@ -51,6 +52,14 @@ func (db *DataBridge) FindTournamentPronosById(id string) (TournamentPronos, err
 		return tPronos, errors.New("invalid id")
 	}
 	err := db.Coll.FindId(bson.ObjectIdHex(id)).One(&tPronos)
+
+	return tPronos, err
+}
+
+func (db *DataBridge) FindTournamentPronosByUser(user string) ([]TournamentPronos, error) {
+	var tPronos []TournamentPronos
+
+	err := db.Coll.Find(bson.M{"user": user}).All(&tPronos)
 
 	return tPronos, err
 }

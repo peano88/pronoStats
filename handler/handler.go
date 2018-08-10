@@ -56,6 +56,24 @@ func (hb *HandlerBridge) GetTournamentPronos(w http.ResponseWriter, r *http.Requ
 	hb.rnd.JSON(w, http.StatusOK, tPronos)
 }
 
+func (hb *HandlerBridge) GetTournamentPronosByUser(w http.ResponseWriter, r *http.Request) {
+	user, ok := mux.Vars(r)["user"]
+
+	if !ok {
+		hb.rnd.JSON(w, http.StatusBadRequest, "No user provided")
+		return
+	}
+
+	tPronos, err := hb.db.FindTournamentPronosByUser(user)
+
+	if err != nil {
+		hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
+		return
+	}
+
+	hb.rnd.JSON(w, http.StatusOK, tPronos)
+}
+
 func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {
 	id, ok := mux.Vars(r)["id_tp"]
 	if !ok {

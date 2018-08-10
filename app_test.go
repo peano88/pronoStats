@@ -33,11 +33,12 @@ var baseProno dataLayer.Prono = dataLayer.Prono{
 var baseTournament = dataLayer.TournamentPronos{
 	Tournament: "Tourn 1",
 	Sport:      "Sport Z",
+	User:       "UserTest",
 	Pronos:     []dataLayer.Prono{baseProno},
 }
 
 const (
-	BASE_ENDPOINT_TOURNAMENT = "/tournament"
+	BASE_ENDPOINT_TOURNAMENT = "/tournaments"
 )
 
 func Test_Endpoints(t *testing.T) {
@@ -77,6 +78,15 @@ func Test_Endpoints(t *testing.T) {
 		prono:     baseProno,
 		expStatus: http.StatusOK,
 	})
+	/*
+		tournamentWithTournB := baseTournament
+		tournamentWithTournB.Tournament = "Tourn B"
+		requests = append(requests, requesTest{
+			endpoint:  BASE_ENDPOINT_TOURNAMENT + "?user=" + tournamentWithTournB.User,
+			method:    "GET",
+			expStatus: http.StatusOK,
+		})
+	*/
 	for i, rt := range requests {
 		buf := new(bytes.Buffer)
 		if rt.tournament.Tournament != "" {
