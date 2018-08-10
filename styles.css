@@ -1,0 +1,35 @@
+body{
+    font-family: 'GlacialIndifferenceRegular';
+   font-weight: normal;
+   font-style: normal; 
+}
+
+.top-container {
+    top: 0px;
+    height: 50px;
+    width: 100%;
+    background: radial-gradient(circle, green,blue);     
+}
+
+#nav {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  right: 30px;
+  top: 10px;
+  height: 40px;
+  line-height: 40px;
+}
+
+.nav-content{
+  color: #FFF;
+  font-size: large;
+  font-weight: bold;
+}
+
+#nav li {
+  display: inline-block;
+  position: relative;
+  margin: 0 0.6em;
+}

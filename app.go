@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	mgo "gopkg.in/mgo.v2"
 
 	"github.com/peano88/pronoStats/dataLayer"
@@ -53,13 +54,16 @@ func main() {
 	var wait time.Duration
 	wait = 13 // to be fixed later
 
+	// Cors enabling
+	handler := cors.Default().Handler(r)
+
 	srv := &http.Server{
 		Addr: "localhost:4000",
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
-		Handler:      r, // Pass our instance of gorilla/mux in.
+		Handler:      handler, // Pass our instance of gorilla/mux in with cors.
 	}
 
 	// Run our server in a goroutine so that it doesn't block.

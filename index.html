@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/glacial-indifference" type="text/css"/> 
+        <link rel="stylesheet" type="text/css" href="styles.css"/>
+    </head>
+    <body>
+        <div class="top-container">
+            <ul id="nav">
+                <li class="nav-content"> Example 1 </li>
+                <li class="nav-content"> Exaple 2 </li>
+                <li class="nav-content"> Sign In </li>
+                </ul>
+            </div>
+        <div id="app">
+            <h1>{{ tournamentName }}</h1>
+            <div v-for="prono in pronos">
+                        {{ prono.home_team }} - {{ prono.away_team }}</br>
+                        {{ prono.home_score }} : {{ prono.away_score }}
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script typeof="text/javascript" src="main.js"></script>
+    </body>
+</html>
