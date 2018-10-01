@@ -42,7 +42,7 @@ var routes = Routes{
 		Name:        "AddProno",
 		Method:      "POST",
 		Pattern:     "/tournaments/{id_tp}/prono",
-		HandlerFunc: hb.AddTournamentPronos,
+		HandlerFunc: hb.AddProno,
 	},
 }
 

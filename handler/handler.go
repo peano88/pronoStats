@@ -85,13 +85,13 @@ func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err := json.NewDecoder(r.Body).Decode(&prono); err != nil {
-		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
+		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	err := hb.db.AddProno(id, prono)
 	if err != nil {
-		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error)
+		hb.rnd.JSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 

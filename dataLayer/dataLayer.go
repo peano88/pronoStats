@@ -12,7 +12,7 @@ type Prono struct {
 	AwayTeam       string `bson:"away_team" json:"away_team"`
 	HomeScore      int    `bson:"home_score" json:"home_score"`
 	AwayScore      int    `bson:"away_score" json:"away_score"`
-	PronoHomeScore int    `bson:"prono_home_team" json:"prono_home_team"`
+	PronoHomeScore int    `bson:"prono_home_score" json:"prono_home_score"`
 	PronoAwayScore int    `bson:"prono_away_score" json:"prono_away_score"`
 }
 
@@ -68,7 +68,7 @@ func (db *DataBridge) AddProno(idTourPronos string, pr Prono) error {
 	if !bson.IsObjectIdHex(idTourPronos) {
 		return errors.New("invalid id")
 	}
-	return db.Coll.UpdateId(idTourPronos, bson.M{"$push": &pr})
+	return db.Coll.UpdateId(bson.ObjectIdHex(idTourPronos), bson.M{"$push": bson.M{"pronos": pr}})
 
 }
 

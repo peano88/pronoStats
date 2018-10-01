@@ -33,3 +33,22 @@ body{
   position: relative;
   margin: 0 0.6em;
 }
+
+.left-container {
+}
+
+.right-container {
+    float: right;
+    margin-left: 50px;
+    width: 670px;
+}
+
+.tab {
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+.selected-tab {
+    color: #16C0B0;
+    text-decoration: underline;
+}
