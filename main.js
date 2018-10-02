@@ -197,10 +197,39 @@ Vue.component('matches', {
 
 })
 
+Vue.component('tournaments',{
+    template:`
+    <div>
+        <ul>
+            <li class="tab" v-for="(tourn,index) in tournaments"
+                :key="index"
+                @click="tournamentSelected(index)" >
+                <span>{{ tourn.tournament }} {{ tourn.sport }}</span>
+            </li>
+        </ul>
+    </div>
+    `,
+    data() {
+        return {
+            activeTournament: ""
+        }
+    },
+    props: {
+        tournaments: []
+    },
+    methods: {
+        tournamentSelected(i) {
+            activeTournament = this.tournaments[i].tournament
+            eventBus.$emit('sel-tourn',i)
+        }
+    }
+})
+
 var app = new Vue({
     el: '#app',
     data: {
         tournamentName: '',
+        tournaments: [],
         pronos: []
     },
     mounted() {
@@ -215,14 +244,20 @@ var app = new Vue({
                     console.log(error);
                 });
         })
+        eventBus.$on('sel-tourn', index => {
+            this.pronos = this.tournaments[index].pronos
+            this.tournamentName = this.tournaments[index].tournament
+        })
 
     },
     methods: {
         getPronos() {
-            let url = "http://localhost:4000/tournaments/5b8a42af5a9f6508e6e5efb7"
+            //let url = "http://localhost:4000/tournaments/5b8a42af5a9f6508e6e5efb7"
+            let url = "http://localhost:4000/tournaments/?user=UserTest"
             axios.get(url).then((response) => {
-                this.pronos = response.data.pronos;
-                this.tournamentName = response.data.tournament
+                this.tournaments = response.data
+                this.pronos = response.data[0].pronos;
+                this.tournamentName = response.data[0].tournament
             }).catch( error => { console.log(error) })
         }
     }

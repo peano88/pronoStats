@@ -14,10 +14,11 @@
         </div>
         <div id="app">
             <div class="left-container">
-                <h1>{{ tournamentName }}</h1>
+                <tournaments :tournaments=tournaments></tournaments>
             </div>
 
             <div class="right-container">
+                <h1>{{ tournamentName }}</h1>
                 <selector-tabs :pronos=pronos></selector-tabs>
             </div>
         </div>

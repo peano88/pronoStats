@@ -78,15 +78,13 @@ func Test_Endpoints(t *testing.T) {
 		prono:     baseProno,
 		expStatus: http.StatusOK,
 	})
-	/*
-		tournamentWithTournB := baseTournament
-		tournamentWithTournB.Tournament = "Tourn B"
-		requests = append(requests, requesTest{
-			endpoint:  BASE_ENDPOINT_TOURNAMENT + "?user=" + tournamentWithTournB.User,
-			method:    "GET",
-			expStatus: http.StatusOK,
-		})
-	*/
+
+	requests = append(requests, requesTest{
+		endpoint:  BASE_ENDPOINT_TOURNAMENT + "?user=" + baseTournament.User,
+		method:    "GET",
+		expStatus: http.StatusOK,
+	})
+
 	for i, rt := range requests {
 		buf := new(bytes.Buffer)
 		if rt.tournament.Tournament != "" {
