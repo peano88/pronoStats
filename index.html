@@ -19,7 +19,8 @@
 
             <div class="right-container">
                 <h1>{{ tournamentName }}</h1>
-                <selector-tabs :pronos=pronos></selector-tabs>
+                <selector-tabs-diff v-if="pronoDiff == true" :pronos=pronos></selector-tabs-diff>
+                <selector-tabs v-else :pronos=pronos></selector-tabs>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>

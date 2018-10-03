@@ -8,12 +8,13 @@ import (
 )
 
 type Prono struct {
-	HomeTeam       string `bson:"home_team" json:"home_team"`
-	AwayTeam       string `bson:"away_team" json:"away_team"`
-	HomeScore      int    `bson:"home_score" json:"home_score"`
-	AwayScore      int    `bson:"away_score" json:"away_score"`
-	PronoHomeScore int    `bson:"prono_home_score" json:"prono_home_score"`
-	PronoAwayScore int    `bson:"prono_away_score" json:"prono_away_score"`
+	HomeTeam        string `bson:"home_team" json:"home_team"`
+	AwayTeam        string `bson:"away_team" json:"away_team"`
+	HomeScore       int    `bson:"home_score" json:"home_score"`
+	AwayScore       int    `bson:"away_score" json:"away_score"`
+	PronoHomeScore  int    `bson:"prono_home_score" json:"prono_home_score"`
+	PronoAwayScore  int    `bson:"prono_away_score" json:"prono_away_score"`
+	PronoDifference int    `bson:"prono_diff" json:"prono_diff"`
 }
 
 type TournamentPronos struct {
@@ -21,6 +22,7 @@ type TournamentPronos struct {
 	User       string        `bson:"user" json:"user"`
 	Sport      string        `bson:"sport" json:"sport"`
 	Tournament string        `bson:"tournament" json:"tournament"`
+	PronoDiff  bool          `bson:"prono_diff" json:"prono_diff"`
 	Pronos     []Prono       `bson:"pronos" json:"pronos"`
 }
 
