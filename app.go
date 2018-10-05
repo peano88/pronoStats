@@ -33,17 +33,7 @@ func init() {
 
 	logErr(err)
 
-	dataBase := session.DB(dataLayer.DB_NAME)
-	if dataBase == nil {
-		log.Fatal("Fatal error in instantiating the DB")
-	}
-
-	db.Coll = dataBase.C(dataLayer.PRONO_COLLECTION)
-
-	if db.Coll == nil {
-		log.Fatal("Fatal error in instantiating the collection")
-	}
-
+	db.Init(session)
 	hb.Init(db)
 	r = NewRouter()
 }
