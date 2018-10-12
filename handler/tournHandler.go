@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	//"github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 	"github.com/peano88/pronoStats/dataLayer"
 )
 
@@ -25,4 +25,22 @@ func (hb *HandlerBridge) AddTournament(w http.ResponseWriter, r *http.Request) {
 
 	hb.rnd.JSON(w, http.StatusOK, newId)
 
+}
+
+func (hb *HandlerBridge) GetTournament(w http.ResponseWriter, r *http.Request) {
+	id, ok := mux.Vars(r)["id"]
+
+	if !ok {
+		hb.rnd.JSON(w, http.StatusBadRequest, "No Id provided")
+		return
+	}
+
+	t, err := hb.db.FindTournamentById(id)
+
+	if err != nil {
+		hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
+		return
+	}
+
+	hb.rnd.JSON(w, http.StatusOK, t)
 }

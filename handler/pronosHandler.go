@@ -8,6 +8,11 @@ import (
 	"github.com/peano88/pronoStats/dataLayer"
 )
 
+type PronosResponse struct {
+	Pronos     dataLayer.TournamentPronos
+	Tournament dataLayer.Tournament
+}
+
 func (hb *HandlerBridge) AddTournamentPronos(w http.ResponseWriter, r *http.Request) {
 	var tPronos dataLayer.TournamentPronos
 	defer r.Body.Close()
@@ -35,14 +40,23 @@ func (hb *HandlerBridge) GetTournamentPronos(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	tPronos, err := hb.db.FindTournamentPronosById(id)
+	var pr PronosResponse
+	var err error
+	pr.Pronos, err = hb.db.FindTournamentPronosById(id)
 
 	if err != nil {
 		hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
 		return
 	}
+	if pr.Pronos.TournamentId != "" {
+		pr.Tournament, err = hb.db.FindTournamentById(pr.Pronos.TournamentId)
+		if err != nil {
+			hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
+			return
+		}
+	}
 
-	hb.rnd.JSON(w, http.StatusOK, tPronos)
+	hb.rnd.JSON(w, http.StatusOK, pr)
 }
 
 func (hb *HandlerBridge) GetTournamentPronosByUser(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +74,25 @@ func (hb *HandlerBridge) GetTournamentPronosByUser(w http.ResponseWriter, r *htt
 		return
 	}
 
-	hb.rnd.JSON(w, http.StatusOK, tPronos)
+	tP := make([]PronosResponse, len(tPronos))
+	for _, p := range tPronos {
+		var tourn dataLayer.Tournament
+		if p.TournamentId != "" {
+			tourn, err = hb.db.FindTournamentById(p.TournamentId)
+			if err != nil {
+				hb.rnd.JSON(w, http.StatusBadRequest, err.Error)
+				return
+			}
+		}
+		aTournPronos := PronosResponse{
+			Pronos:     p,
+			Tournament: tourn,
+		}
+
+		tP = append(tP, aTournPronos)
+	}
+
+	hb.rnd.JSON(w, http.StatusOK, tP)
 }
 
 func (hb *HandlerBridge) AddProno(w http.ResponseWriter, r *http.Request) {

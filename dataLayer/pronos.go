@@ -17,12 +17,13 @@ type Prono struct {
 }
 
 type TournamentPronos struct {
-	ID         bson.ObjectId `bson:"_id" json:"id"`
-	User       string        `bson:"user" json:"user"`
-	Sport      string        `bson:"sport" json:"sport"`
-	Tournament string        `bson:"tournament" json:"tournament"`
-	PronoDiff  bool          `bson:"prono_diff" json:"prono_diff"`
-	Pronos     []Prono       `bson:"pronos" json:"pronos"`
+	ID           bson.ObjectId `bson:"_id" json:"id"`
+	User         string        `bson:"user" json:"user"`
+	Sport        string        `bson:"sport" json:"sport"`
+	Tournament   string        `bson:"tournament" json:"tournament"`
+	TournamentId string        `bson:"tourn_id" json:"tourn_id"`
+	PronoDiff    bool          `bson:"prono_diff" json:"prono_diff"`
+	Pronos       []Prono       `bson:"pronos" json:"pronos"`
 }
 
 func (db *DataBridge) AddTournamentPronos(tp TournamentPronos) (string, error) {

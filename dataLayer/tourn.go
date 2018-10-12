@@ -1,6 +1,7 @@
 package dataLayer
 
 import (
+	"errors"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -39,4 +40,15 @@ func (db *DataBridge) AddTournament(t Tournament) (string, error) {
 	}
 
 	return t.ID.Hex(), nil
+}
+
+func (db *DataBridge) FindTournamentById(id string) (Tournament, error) {
+	var t Tournament
+
+	if !bson.IsObjectIdHex(id) {
+		return t, errors.New("invalid id")
+	}
+	err := db.TournColl.FindId(bson.ObjectIdHex(id)).One(&t)
+
+	return t, err
 }

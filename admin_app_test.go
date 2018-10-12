@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"gopkg.in/mgo.v2/bson"
+
 	"github.com/peano88/pronoStats/dataLayer"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +27,10 @@ const (
 func Test_Tournaments(t *testing.T) {
 	var requests []reqTourn
 
+	id := bson.NewObjectId()
+
 	newTournament := dataLayer.Tournament{
+		ID:    id,
 		Sport: "Footy",
 		Name:  "Champion's League",
 		Teams: []dataLayer.Team{
@@ -63,6 +68,12 @@ func Test_Tournaments(t *testing.T) {
 		endpoint:   BASE_ENDPOINT_TOURNAMENT_ADMIN,
 		method:     "POST",
 		tournament: newTournament,
+		expStatus:  http.StatusOK,
+	})
+	requests = append(requests, reqTourn{
+		endpoint:   BASE_ENDPOINT_TOURNAMENT_ADMIN + "/" + id.Hex(),
+		method:     "GET",
+		tournament: dataLayer.Tournament{},
 		expStatus:  http.StatusOK,
 	})
 

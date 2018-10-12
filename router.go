@@ -53,6 +53,12 @@ var adminRoutes = Routes{
 		Pattern:     "/tournaments",
 		HandlerFunc: hb.AddTournament,
 	},
+	Route{
+		Name:        "AdmGetTourn",
+		Method:      "GET",
+		Pattern:     "/tournaments/{id}",
+		HandlerFunc: hb.GetTournament,
+	},
 }
 
 //NewRouter configures a new router to the API
