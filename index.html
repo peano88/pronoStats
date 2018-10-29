@@ -45,7 +45,8 @@
                     </div>
                     <div class="col-md-9" role="main">
                         <h1 class="h2">{{ tournamentName }}</h1>
-                        <selector-tabs :pronos=pronos></selector-tabs>
+                <selector-tabs-diff v-if="pronoDiff == true" :pronos=pronos></selector-tabs-diff>
+                <selector-tabs v-else :pronos=pronos></selector-tabs>
                     </div>
                 </div>
             </div>

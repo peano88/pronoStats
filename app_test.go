@@ -19,6 +19,7 @@ type requesTest struct {
 	prono      dataLayer.Prono
 	tournament dataLayer.TournamentPronos
 	expStatus  int
+	label      string
 }
 
 var baseProno dataLayer.Prono = dataLayer.Prono{
@@ -49,6 +50,7 @@ func Test_Endpoints(t *testing.T) {
 		method:     "POST",
 		tournament: baseTournament,
 		expStatus:  http.StatusOK,
+		label:      "basic creation without id",
 	})
 
 	tournamentWithId := baseTournament
@@ -58,18 +60,21 @@ func Test_Endpoints(t *testing.T) {
 		method:     "POST",
 		tournament: tournamentWithId,
 		expStatus:  http.StatusOK,
+		label:      "basic creation with id",
 	})
 
 	requests = append(requests, requesTest{
 		endpoint:  BASE_ENDPOINT_TOURNAMENT + "/" + tournamentWithId.ID.Hex(),
 		method:    "GET",
 		expStatus: http.StatusOK,
+		label:     "basic get",
 	})
 
 	requests = append(requests, requesTest{
 		endpoint:  BASE_ENDPOINT_TOURNAMENT + "/010102345687123456789012",
 		method:    "GET",
 		expStatus: http.StatusBadRequest,
+		label:     "get with non-existing id",
 	})
 
 	requests = append(requests, requesTest{
@@ -77,12 +82,14 @@ func Test_Endpoints(t *testing.T) {
 		method:    "POST",
 		prono:     baseProno,
 		expStatus: http.StatusOK,
+		label:     "Create prono",
 	})
 
 	requests = append(requests, requesTest{
 		endpoint:  BASE_ENDPOINT_TOURNAMENT + "?user=" + baseTournament.User,
 		method:    "GET",
 		expStatus: http.StatusOK,
+		label:     "get tprono by user",
 	})
 
 	for i, rt := range requests {
@@ -101,7 +108,7 @@ func Test_Endpoints(t *testing.T) {
 		rr := httptest.NewRecorder()
 		r.ServeHTTP(rr, req)
 
-		assert.Equal(t, rt.expStatus, rr.Code)
+		assert.Equal(t, rt.expStatus, rr.Code, rt.label)
 
 		/*
 			if rt.expProno.HomeTeam != "" {

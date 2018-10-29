@@ -1,75 +1,39 @@
 package dataLayer
 
 import (
-	"errors"
+	"log"
 
 	mgo "gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
-type Prono struct {
-	HomeTeam       string `bson:"home_team" json:"home_team"`
-	AwayTeam       string `bson:"away_team" json:"away_team"`
-	HomeScore      int    `bson:"home_score" json:"home_score"`
-	AwayScore      int    `bson:"away_score" json:"away_score"`
-	PronoHomeScore int    `bson:"prono_home_score" json:"prono_home_score"`
-	PronoAwayScore int    `bson:"prono_away_score" json:"prono_away_score"`
-}
-
-type TournamentPronos struct {
-	ID         bson.ObjectId `bson:"_id" json:"id"`
-	User       string        `bson:"user" json:"user"`
-	Sport      string        `bson:"sport" json:"sport"`
-	Tournament string        `bson:"tournament" json:"tournament"`
-	Pronos     []Prono       `bson:"pronos" json:"pronos"`
-}
-
 type DataBridge struct {
-	Coll *mgo.Collection
+	PronoColl *mgo.Collection
+	TournColl *mgo.Collection
 }
 
 const (
 	PRONO_COLLECTION = "PRONOS"
+	TOURN_COLLECTION = "TOURN"
 	DB_NAME          = "PRONO_STATS"
 )
 
-func (db *DataBridge) AddTournamentPronos(tp TournamentPronos) (string, error) {
-	if tp.ID == "" {
-		tp.ID = bson.NewObjectId()
+func (db *DataBridge) Init(session *mgo.Session) {
+
+	dataBase := session.DB(DB_NAME)
+	if dataBase == nil {
+		log.Fatal("Fatal error in instantiating the DB")
 	}
 
-	if err := db.Coll.Insert(&tp); err != nil {
-		return "", err
+	db.PronoColl = dataBase.C(PRONO_COLLECTION)
+	db.TournColl = dataBase.C(TOURN_COLLECTION)
+
+	if db.PronoColl == nil {
+		log.Fatal("Fatal error in instantiating the prono collection")
 	}
 
-	return tp.ID.Hex(), nil
-}
-
-func (db *DataBridge) FindTournamentPronosById(id string) (TournamentPronos, error) {
-	var tPronos TournamentPronos
-
-	if !bson.IsObjectIdHex(id) {
-		return tPronos, errors.New("invalid id")
+	if db.TournColl == nil {
+		log.Fatal("Fatal error in instantiating the tourn collection")
 	}
-	err := db.Coll.FindId(bson.ObjectIdHex(id)).One(&tPronos)
-
-	return tPronos, err
-}
-
-func (db *DataBridge) FindTournamentPronosByUser(user string) ([]TournamentPronos, error) {
-	var tPronos []TournamentPronos
-
-	err := db.Coll.Find(bson.M{"user": user}).All(&tPronos)
-
-	return tPronos, err
-}
-
-func (db *DataBridge) AddProno(idTourPronos string, pr Prono) error {
-	if !bson.IsObjectIdHex(idTourPronos) {
-		return errors.New("invalid id")
-	}
-	return db.Coll.UpdateId(bson.ObjectIdHex(idTourPronos), bson.M{"$push": bson.M{"pronos": pr}})
-
 }
 
 //Disabled
@@ -79,7 +43,7 @@ func (db *DataBridge) FindPronoById(id string) (Prono, error) {
 	if !bson.IsObjectIdHex(id) {
 		return prono, errors.New("invalid id")
 	}
-	err := db.Coll.FindId(bson.ObjectIdHex(id)).One(&prono)
+	err := db.PronoCollFindId(bson.ObjectIdHex(id)).One(&prono)
 
 	return prono, err
 }

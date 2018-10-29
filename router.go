@@ -46,6 +46,21 @@ var routes = Routes{
 	},
 }
 
+var adminRoutes = Routes{
+	Route{
+		Name:        "AdmAddTourn",
+		Method:      "POST",
+		Pattern:     "/tournaments",
+		HandlerFunc: hb.AddTournament,
+	},
+	Route{
+		Name:        "AdmGetTourn",
+		Method:      "GET",
+		Pattern:     "/tournaments/{id}",
+		HandlerFunc: hb.GetTournament,
+	},
+}
+
 //NewRouter configures a new router to the API
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
@@ -68,6 +83,18 @@ func NewRouter() *mux.Router {
 				Handler(handler)
 		}
 
+	}
+	s := router.PathPrefix("/admin").Subrouter()
+
+	for _, route := range adminRoutes {
+		var handler http.Handler
+		handler = route.HandlerFunc
+
+		s.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
 	}
 	return router
 }

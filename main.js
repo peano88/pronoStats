@@ -52,6 +52,38 @@ Vue.component('selector-tabs', {
     }
 })
 
+Vue.component('selector-tabs-diff', {
+    template: `
+    <div>
+        <ul>
+          <span class="tab" 
+          v-for="(tab, index) in tabs" 
+          :key="index"
+          @click="selectedTab = tab">{{ tab }}
+          </span>
+          </ul>
+
+        <div v-show="selectedTab === 'Matches'">
+            <matches :pronos=pronos></matches>            
+        </div>
+        <div v-show="selectedTab === 'Pronos'">
+            <pronos-diff :pronos=pronos></pronos-diff>            
+        </div>
+        <div v-show="selectedTab === 'Stats'">
+            <stats-diff :pronos=pronos></stats-diff>            
+        </div>
+    </div>
+      `,
+    props: {
+        pronos: []
+    },
+    data() {
+        return {
+            tabs: ['Matches', 'Pronos', 'Stats'],
+            selectedTab: 'Matches'
+        }
+    }
+})
 Vue.component('newProno', {
     template:`
     <div>
@@ -105,6 +137,51 @@ Vue.component('newProno', {
         
 })
 
+Vue.component('newProno-diff', {
+    template:`
+    <div>
+        <form @submit.prevent="onSubmit">
+            <p>
+                <label for="pronoDiff">Difference</label>
+                <input id="pronoDiff" v-model.number="prono_diff" type="number">
+            </p>
+            <p>
+                <input type="submit" value="Submit">
+            </p>
+        </form>
+    </div>
+    `,
+    data() {
+        return {
+            home_team: "FixedA",
+            away_team: "FixedB",
+            home_score: 3,
+            away_score: 1,
+            prono_diff: 0
+        }
+    },
+    methods: {
+        onSubmit() {
+            let thisProno = {
+                home_team: this.home_team,
+                away_team: this.away_team,
+                home_score: this.home_score,
+                away_score: this.away_score,
+                prono_diff: this.prono_diff,
+            }
+                this.home_team = "FixedA"
+                this.away_team = "FixedB"
+                this.home_score = 3
+                this.away_score = 1
+                this.prono_diff = 0
+
+            this.$emit('new-prono',thisProno)
+            
+        }
+
+    }
+        
+})
 Vue.component('pronos', {
     mixins: [matchMixin],
     template:`
@@ -167,6 +244,40 @@ Vue.component('pronos', {
 
 })
 
+Vue.component('pronos-diff', {
+    template:`
+    <div>
+        <div v-for="prono in pronos">
+            {{ prono.home_team }} - {{ prono.away_team }}</br>
+            {{ prono.prono_diff }}
+            {{ prono.home_score }} : {{ prono.away_score }}
+        </div>
+        <button v-on:click="formVisible">New</button>
+        <div v-show="formV">
+            <newProno-diff @new-prono="newProno"></newProno-diff>
+        </div>
+    </div>
+    `,
+    props: {
+        pronos: []
+    },
+    data() {
+        return {
+            formV: false
+        }
+    },
+    methods: {
+        formVisible() {
+            this.formV = true;
+        },
+        newProno(aProno) {
+            this.formV = false
+            eventBus.$emit('new-prono', aProno)
+        }
+
+    }
+
+})
 Vue.component('stats', {
     mixins: [matchMixin],
     template: `
@@ -221,6 +332,64 @@ Vue.component('stats', {
             return this.pronos.filter(
                 prono => matchResult(prono.prono_home_score,prono.prono_away_score) == 1).length;
 
+        }
+
+    }
+})
+
+Vue.component('stats-diff', {
+    template: `
+    <div>
+        You got {{ matchesCorrect() }} matches out of {{ matchesTot }} <br>
+        Home team won {{ homeGains() }} and you predicted {{ pronoHomeGains() }} times <br>
+        </br>
+        Average difference: {{ diffTot() / matchesTot }} <br>
+        Average prono difference: {{ diffPronoTot() / matchesTot }} <br>
+
+    </div>
+    `,
+    props: {
+        pronos: []
+    },
+    computed: {
+        matchesTot: function () {
+            return this.pronos.length;
+        }
+    },
+    methods: {
+        matchesCorrect: function () {
+            return this.pronos.reduce((nb,m) => {
+                if (this.matchResult(m.home_score,m.away_score) === 
+                    this.matchResult(m.prono_home_score,m.prono_away_score)) {
+                    return nb + 1
+                } else { 
+                    return nb
+                }
+            },0);
+        },
+        matchResult:  (diff) => {
+            if (diff > 0)
+                return 1;
+            else if (diff == 0)
+                return 0;
+            else
+                return 2;
+        },
+        homeGains() {
+            return this.pronos.filter(
+                prono => this.matchResult(prono.home_score-prono.away_score) == 1).length;
+
+        },
+        pronoHomeGains() {
+            return this.pronos.filter(
+                prono => this.matchResult(prono.prono_diff) == 1).length;
+
+        },
+        diffTot() {
+            return this.pronos.reduce((d,p) => d + (p.home_score-p.away_score),0)
+        },
+        diffPronoTot() {
+            return this.pronos.reduce((d,p) => d + p.prono_diff,0)
         }
 
     }
@@ -291,6 +460,7 @@ var app = new Vue({
     data: {
         tournamentName: '',
         tournaments: [],
+        pronoDiff: false,
         pronos: []
     },
     mounted() {
@@ -308,6 +478,7 @@ var app = new Vue({
         eventBus.$on('sel-tourn', index => {
             this.pronos = this.tournaments[index].pronos
             this.tournamentName = this.tournaments[index].tournament
+            this.pronoDiff = this.tournaments[index].prono_diff
         })
 
     },
