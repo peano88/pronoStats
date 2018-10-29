@@ -1,18 +1,35 @@
-
-
 var eventBus = new Vue()
+
+const matchResult =  function(home,away) {
+            if (home > away)
+                return 1;
+            else if (home === away)
+                return 0;
+            else
+                return 2;
+        }
+
+var matchMixin = {
+    methods: {
+        pronoCorrect: (prono) => {
+            return (matchResult(prono.home_score,prono.away_score) === matchResult(prono.prono_home_score, prono.prono_away_score))
+        },
+        pronoExact: (prono) => {
+            return (prono.home_score == prono.prono_home_score && prono.away_score == prono.prono_away_score)
+        }
+    }
+}
 
 Vue.component('selector-tabs', {
     template: `
     <div>
-        <ul>
-          <span class="tab" 
-          v-for="(tab, index) in tabs" 
+        <div class="btn-group">
+        <button  class="btn bg-secondary text-light" v-for="(tab, index) in tabs" 
           :key="index"
-          @click="selectedTab = tab">{{ tab }}
-          </span>
-          </ul>
-
+            @click="selectedTab = tab">
+            {{ tab }}
+            </button>
+          </div>
         <div v-show="selectedTab === 'Matches'">
             <matches :pronos=pronos></matches>            
         </div>
@@ -89,13 +106,40 @@ Vue.component('newProno', {
 })
 
 Vue.component('pronos', {
+    mixins: [matchMixin],
     template:`
     <div>
-        <div v-for="prono in pronos">
-            {{ prono.home_team }} - {{ prono.away_team }}</br>
-            {{ prono.prono_home_score }} : {{ prono.prono_away_score }}
-            {{ prono.home_score }} : {{ prono.away_score }}
-        </div>
+    <table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th svope="col">#</th>
+        <th scope="col">Home Team</th>
+        <th scope="col">Prono Score</th>
+        <th scope="col">Real Score</th>
+        <th scope="col">Away Team</th>
+        <th scope="col">Prono Correct</th>
+        <th scope="col">Prono Exact</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr v-for="(prono,index) in pronos">
+            <th scope="row">{{index}}</th>
+                <td>{{ prono.home_team }}</td>
+                <td>{{ prono.prono_home_score }} - {{ prono.prono_away_score }}</td>
+                <td>{{ prono.home_score }} - {{ prono.away_score }}</td>
+                <td>{{ prono.away_team }}</td>
+                <td>
+                    <div v-if=pronoCorrect(prono)>Yes</div>
+                    <div v-else>No</div>
+                </td>
+                <td>
+                    <div v-if=pronoExact(prono)>Yes</div>
+                    <div v-else>No</div>
+                </td>
+            </tr>
+    </tr>
+    </tbody>
+    </table>
         <button v-on:click="formVisible">New</button>
         <div v-show="formV">
             <newProno @new-prono="newProno"></newProno>
@@ -124,16 +168,25 @@ Vue.component('pronos', {
 })
 
 Vue.component('stats', {
+    mixins: [matchMixin],
     template: `
     <div>
-        You got {{ matchesCorrect() }} matches out of {{ matchesTot }} <br>
-        Home team won {{ homeGains() }} and you predicted {{ pronoHomeGains() }} times <br>
+        General Stats 
+        Tournament Stats:
+        <ul class="list-group">
+            <li class="list-group-item"> Home gains: {{ homeGains() }} </li>
+            <li class="list-group-item"> Total Goal Scored: {{ goalsScoredTot() }} </li>
+            <li class="list-group-item"> Average Goals Scored: {{ goalsScoredTot() / matchesTot }} </li>
+        </ul>
 
-        Total goals scored : {{ goalsScoredTot() }}  <br>
-        Total goals predicted : {{ goalsPronoTot() }}  <br>
-        Average goals: {{ goalsScoredTot() / matchesTot }} <br>
-        Average goals predicted: {{ goalsPronoTot() / matchesTot }}
-    </div>
+        Prono Stats
+        <ul class="list-group">
+            <li class="list-group-item"> Correct Pronos : {{ matchesCorrect() }} / {{ matchesTot }} </li>
+            <li class="list-group-item"> Home Gains predicted: {{ pronoHomeGains() }} </li>
+            <li class="list-group-item"> Total Goals predicted: {{ goalsPronoTot() }} </li>
+            <li class="list-group-item"> Average Goals Predicted: {{ goalsPronoTot() / matchesTot }} </li>
+        </ul>
+    <div>
     `,
     props: {
         pronos: []
@@ -146,21 +199,12 @@ Vue.component('stats', {
     methods: {
         matchesCorrect: function () {
             return this.pronos.reduce((nb,m) => {
-                if (this.matchResult(m.home_score,m.away_score) === 
-                    this.matchResult(m.prono_home_score,m.prono_away_score)) {
+                if (this.pronoCorrect(m)) {
                     return nb + 1
                 } else { 
                     return nb
                 }
             },0);
-        },
-        matchResult:  (home,away) => {
-            if (home > away)
-                return 1;
-            else if (home === away)
-                return 0;
-            else
-                return 2;
         },
         goalsScoredTot() {
             return this.pronos.reduce((nb,p) => nb + (p.home_score + p.away_score),0);
@@ -170,12 +214,12 @@ Vue.component('stats', {
         },
         homeGains() {
             return this.pronos.filter(
-                prono => this.matchResult(prono.home_score,prono.away_score) == 1).length;
+                prono => matchResult(prono.home_score,prono.away_score) == 1).length;
 
         },
         pronoHomeGains() {
             return this.pronos.filter(
-                prono => this.matchResult(prono.prono_home_score,prono.prono_away_score) == 1).length;
+                prono => matchResult(prono.prono_home_score,prono.prono_away_score) == 1).length;
 
         }
 
@@ -184,12 +228,27 @@ Vue.component('stats', {
 
 Vue.component('matches', {
     template:`
-    <div>
-        <div v-for="prono in pronos">
-            {{ prono.home_team }} - {{ prono.away_team }}</br>
-            {{ prono.home_score }} : {{ prono.away_score }}
-        </div>
-    </div>
+    <table class="table table-bordered table-striped">
+    <thead>
+    <tr>
+        <th svope="col">#</th>
+        <th scope="col">Home Team</th>
+        <th scope="col">Home Score</th>
+        <th scope="col">Away Score</th>
+        <th scope="col">Away Team</th>
+    </tr>
+    </thead>
+    <tbody>
+        <tr v-for="(prono,index) in pronos">
+            <th scope="row">{{index}}</th>
+                <td>{{ prono.home_team }}</td>
+                <td>{{ prono.home_score }}</td>
+                <td>{{ prono.away_score }}</td>
+                <td>{{ prono.away_team }}</td>
+            </tr>
+    </tr>
+    </tbody>
+    </table>
     `,
     props: {
         pronos: []
@@ -200,11 +259,13 @@ Vue.component('matches', {
 Vue.component('tournaments',{
     template:`
     <div>
-        <ul>
-            <li class="tab" v-for="(tourn,index) in tournaments"
+    Tournaments
+        <ul class="list-group">
+            <button class="list-group-item list-group-item-action" 
+            v-for="(tourn,index) in tournaments"
                 :key="index"
-                @click="tournamentSelected(index)" >
-                <span>{{ tourn.tournament }} {{ tourn.sport }}</span>
+                @click="tournamentSelected(index)">
+                {{ tourn.tournament }} {{ tourn.sport }}</button>
             </li>
         </ul>
     </div>
